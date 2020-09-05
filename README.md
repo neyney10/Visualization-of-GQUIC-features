@@ -17,6 +17,7 @@ Wireshark does not make it easy on us, so had to create some utillity scripts to
     - numpy
     - ~~matplotlib==3.1.2~~ (deprecated dependency)
     - kaleido==0.03
+- Wireshark
 
 ### Step 1: Export fields as CSV file.
 All GQUIC fields (or tags) that are supported by Wireshark dissectors can be found in the following URL:
@@ -29,7 +30,7 @@ HTML table to csv extractor: https://www.convertcsv.com/html-table-to-csv.htm
 Open the "HTML table to csv extractor" and insert there as URL the "fields website" to make it generate a CSV file, download the contents into CSV.
 
 ### Step 2: Transform the fields to acceptable Wireshark's preferences format.
-Run the script found in the jupyer notebook in that directory "csv2wireshark-columns".
+Run the script found in the jupyter notebook in that directory "csv2wireshark-columns".
 
 *Note: Don't forget to update the filename's path in this script to process the correct file - which is the file downloaded as CSV in previous step.*
 
@@ -53,7 +54,7 @@ and copy all the exported CSV file to this section and save the file.
 Now run Wireshark and make sure that you can see all fields as displayed columns in capture view.
 
 ### Step 4: Open PCAP file in Wireshark and export to CSV.
-By default (there is no way to change it yet as version 3.3.6), Wireshark exports only the data that is displayed in columns (and in the same format and view), i.e. what you see is what you get.
+By default (there is no way to change it yet as version 3.2.6), Wireshark exports only the data that is displayed in columns (and in the same format and view), i.e. what you see is what you get.
 
 Therefore, you can add columns and remove columns as you wish and filter only the packets you want to export.
 
