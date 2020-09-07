@@ -1,0 +1,29 @@
+th , thead > tr > td{
+    background-color: aliceblue;
+}
+
+#menu {
+    border-top: 3px solid royalblue;
+    border-bottom: 1px solid lightblue;
+    padding-top: 3px;
+    background-color: aliceblue;
+}
+
+#features-list > div {
+    border:1px solid black;
+    background-color: antiquewhite;
+    width: 150px;
+    font-size: larger;
+}
+.list-group{
+    flex-direction: row;
+}
+
+.selectedFeature {
+    background-color: seagreen;
+}
+
+.selectedFeature:hover {
+    background-color: green;
+}
+

@@ -2,6 +2,7 @@
 import plotly.express as plotlyExpress
 import numpy as np
 import plotly.graph_objects as go
+from .coloring_methods import ColorByDefault
 
 colorsArr=['rgb(0,0,255)','rgb(255,0,0)', 'rgb(0,255,0)','rgb(92, 138, 102)','rgb(0,0,0)','rgb(255, 253, 0)']
 
@@ -13,7 +14,7 @@ class ScatterPlotFactory():
         self.yTitle = yTitle
         self.fontSize = fontSize
 
-    def createPlot(self, packets, col1, col2, coloringMethod):
+    def createPlot(self, packets, col1, col2, coloringMethod=ColorByDefault()):
         print('Title: '+self.plotTitle + ', Columns: ' + self.xTitle+'|'+self.yTitle + ' ['+col1+'/'+col2+']')
 
         packetColors, numOfColors = coloringMethod.color(packets)
@@ -46,7 +47,7 @@ class LinePlotFactory():
         self.yTitle = yTitle
         self.fontSize = fontSize
 
-    def createPlot(self, packets, col1, col2, coloringMethod):
+    def createPlot(self, packets, col1, col2, coloringMethod=ColorByDefault()):
         print('(Line) Title: '+self.plotTitle + ', Columns: ' + self.xTitle+'|'+self.yTitle + ' ['+col1+'/'+col2+']')
 
         packetColors, numOfColors = coloringMethod.color(packets)

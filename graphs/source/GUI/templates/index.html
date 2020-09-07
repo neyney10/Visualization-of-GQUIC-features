@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">		<title> CSV plotter GUI (Web) </title>
+		<link rel="stylesheet" href="static/style.css">		
+		<title> CSV plotter GUI (Web) </title>
+	</head>
+
+	<body>
+		<div id="menu" class="row">
+			<button type="button" class="btn btn-primary col" id="filenames" onclick="onchangetest(this)">Refresh file list</button>
+			<select class="custom-select col" id="filenames-select">
+			</select>
+			<button type="button col" class="btn btn-primary" id="preview" onclick="getFileColumnsCmd(this)">Preview file</button>
+			<button type="button col" class="btn btn-primary" id="load" onclick="loadFileCmd()"> Load file </button>
+			<button type="button col" class="btn btn-primary" id="load" onclick="getSessionsCmd()"> See Sessions </button>
+			<select class="custom-select col" id="coloring-method-select">
+				<option value="IP"> By IP prefix</option>
+				<option value="Time"> By Time intervals</option>
+			</select>
+			<input type="text" class="form-control col" id="colorValues" placeholder="IP prefix or Time intervals as JS array">
+			<button type="button" class="btn btn-primary col" id="load" onclick="plotFeatures()"> Plot </button>
+
+		</div>
+		<hr>
+		<div id="features-list" class="list-group">
+			<div class="list-group-item">Select to plot</div>
+		</div>
+
+		<div>
+			<div>
+				<table id="data-table"class="table table-hover">
+					<thead>
+						<tr>
+						</tr>
+					</thead>
+					<tbody>
+					</tbody>
+				</table>
+			</div>
+			
+		</div>
+		
+
+	</body>
+
+</html>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
+<script type="text/javascript" charset="utf-8">
+	var socket = io(); 
+
+    socket.on('connect', function() {
+        socket.emit('my event', {data: 'I\'m connected!'});
+	});
+
+	socket.on('available-data-files', (files)=> {
+		filenames = files.data
+		console.log(filenames)
+
+		let select = document.getElementById("filenames-select");
+		select.length = 0;
+		for (let filename of filenames)
+		{
+			let option = document.createElement("option");
+			option.text = filename;
+			select.appendChild(option);
+		}
+	})
+
+	socket.on('res-file-columns', (fileData)=> {
+		console.log(fileData)
+		columns = fileData.columns
+		values = fileData.data
+		let dataTable = document.getElementById('data-table');
+		clearTable(dataTable);
+		displayColumnsInTable(dataTable, columns);
+		displayDataInTable(dataTable, values);
+
+		// features table 2
+		let featuresList = document.getElementById('features-list');
+		populateFeaturesTable2(featuresList, columns);
+		
+	})
+
+	socket.on('res-load-file', (result)=> {
+		console.log(result)
+		alert(result.res+ "\nRows: "+ result.rows);
+	})
+
+	socket.on('res-sessions', (result)=> {
+		console.log(result)
+		alert(result.sessionIds);
+		
+	})
+	
+	function onchangetest(elem) 
+	{
+		socket.emit('my event', {data:'test'})
+	}
+
+	function getSessionsCmd()
+	{
+		socket.emit('get-sessions',{});
+	}
+
+	function loadFileCmd()
+	{
+		let select = document.getElementById("filenames-select");
+		socket.emit("load-file", {data: select.options[select.selectedIndex].text})
+	}
+
+	function plotFeatures()
+	{
+		selectedFeatures = [...featuresToPlot].filter(([k,v])=>{
+			return v;
+		}).map(([k,v])=> { return k});
+
+		console.log(selectedFeatures);
+		let colorMethodSelect = document.getElementById("coloring-method-select");
+		let colorMethod = colorMethodSelect.options[colorMethodSelect.selectedIndex].value;
+		let colorValuesInput = document.getElementById("colorValues");
+		let colorValues = colorValuesInput.value;
+		if (colorMethod == 'Time')
+			colorValues =JSON.parse(colorValues);
+
+		socket.emit("plot-features", {features: selectedFeatures, coloringMethod: colorMethod, coloringMethodValues: colorValues });
+	}
+
+
+	function getFileColumnsCmd()
+	{
+		let select = document.getElementById("filenames-select");
+		socket.emit("get-file-columns", {data: select.options[select.selectedIndex].text, nrows: 5})
+	}
+
+	function displayColumnsInTable(dataTable, columns)
+	{
+		let tableHeader =  dataTable.getElementsByTagName("tr")[0];
+		tableHeader.innerHTML = '' // hack
+		for (let col of columns)
+		{
+			let colElem = tableHeader.insertCell(-1); //document.createElement("th");
+			colElem.innerText = col;
+		}
+	}
+
+	function displayDataInTable(dataTable, values)
+	{
+
+		let tableBody = dataTable.getElementsByTagName("tbody")[0];
+		for (let valueRow of values)
+		{
+			let rowEleme = tableBody.insertRow(-1);
+			for (let valueCell of valueRow)
+			{
+				let valElem = rowEleme.insertCell(-1); //document.createElement("th");
+				valElem.innerText = valueCell;
+			}
+		}
+	}
+
+	function clearTable(table)
+	{
+		thead = document.createElement("thead");
+		thead.insertRow(-1);
+		tbody = document.createElement("tbody");
+		
+		table.replaceChild(thead,table.getElementsByTagName("thead")[0]);
+		table.replaceChild(tbody,table.getElementsByTagName("tbody")[0]);
+	}
+
+	// feature/fields/column table
+	// globals for now
+	featuresToPlot = new Map()
+	/**
+	 * table: table HTMLElement.
+	 * features
+	 */
+	// other version
+
+	function populateFeaturesTable2(table, features)
+	{
+		for (let feature of features)
+		{
+			let rowEleme = document.createElement("a");
+			rowEleme.innerHTML = feature;
+			rowEleme.classList.add('list-group-item','list-group-item-action','selectedFeature');
+			rowEleme.onclick = ()=>{ featurePlotSelectCmd2(rowEleme, feature) }
+			table.appendChild(rowEleme);
+
+			featuresToPlot.set(feature, true);
+		}
+	}
+
+	function featurePlotSelectCmd2(elem, feature)
+	{
+		console.log(feature);
+		console.log(!featuresToPlot.get())
+		featuresToPlot.set(feature, !featuresToPlot.get(feature));
+		elem.classList.toggle('selectedFeature');
+		
+		console.log(featuresToPlot);
+	}
+
+</script>
