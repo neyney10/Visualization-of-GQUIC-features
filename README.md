@@ -1,4 +1,4 @@
-# Visualisation of GQUIC 043 features/fields in graphical plots.
+# Visualization of GQUIC 043 features/fields in graphical plots.
 ## What is it?
 This repository contains scripts that allow easy visualization of GQUIC version 043 (used by Android's youtube app) in graphs using Plotly as graph generator.
 
@@ -9,6 +9,17 @@ Wireshark does not make it easy on us, so had to create some utillity scripts to
 ### The Flow's outline.
 ![Flow](./readme-media/flowexport.png)
 
+### Q/A
+Question: Why not use TShark instead of Wireshark?
+> Answer:
+>
+> Exporting fields to CSV using tshark.exe it's easy and stright forward to use, although not without drawbacks. tshark outputs header names the same as tag names, i.e. instead of header name of "Source" for IP source, it would display "ip.src", therefore it requires more preprocessing afterwards. Also, the fields value format is displayed as raw, i.e. most if not everything is displayed as number, such as booleans, instead of True or False it would output 0 or 1, same about every textual representation such as FRAME TYPES of GQUIC, instead of FRAME_STREAM, FRAME_ACK it will display frame number ID's.
+
+Question: Does those guidelines work for other procotols other than GQUIC?
+> Answer: 
+>
+> Mostly yes, the only things that would require changes are the preprocessing before plotting graphs (Step 5) and the plotting graphs themselves to display the required fields (Step 7).
+
 ### Dependencies.
 - Python 3.6+
     - Jupyter notebook.
@@ -17,6 +28,8 @@ Wireshark does not make it easy on us, so had to create some utillity scripts to
     - numpy
     - ~~matplotlib==3.1.2~~ (deprecated dependency)
     - kaleido==0.03
+    - flask
+    - flask_socketio
 - Wireshark
 
 ### Step 1: Export fields as CSV file.
@@ -48,7 +61,7 @@ Go ahead to your Wireshark's preferences file, for Ubuntu and most linux OS's th
 If you can't find it, then the following link might be useful:
 https://www.wireshark.org/docs/wsug_html_chunked/ChAppFilesConfigurationSection.html
 
-After you open the file go to ----- TODO -----
+After you open the file go to "gui.column.format"
 and copy all the exported CSV file to this section and save the file.
 
 Now run Wireshark and make sure that you can see all fields as displayed columns in capture view.
@@ -64,7 +77,7 @@ Make sure to uncheck/check some export configuration in the save window to match
 *Note:* in case of very long values, Wireshark by default limits the amount of data displayed to 256, you might want to change the constant value in "column-info.h" from 256 to something larger such as 1024 or 4096 in Wireshark's source code and compile it manually.
 
 ### Step 5: Transform packet fields of PCAP’s CSV to displayable format for visualization.
-Some of the fields/tags/columns as the same header name, which makes it hard to work with scripts, along with that there are some data saved in hexa-decimal format which canno't be displayed by Plotly graphing library, therefore we need to convert those to decimal, and maybe normalize them too if they are too large.
+Some of the fields/tags/columns as the same header name, which makes it hard to work with scripts, along with that there are some data saved in hexa-decimal format which can't be displayed by Plotly graphing library, therefore we need to convert those to decimal, and maybe normalize them too if they are too large.
 
 Go ahead to the "csv-preprocess" directory that can be found in this repository to find the scripts that transforms the CSV values to formats that can be correctly visualized by Plotly later on.
 
