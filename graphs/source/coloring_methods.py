@@ -72,6 +72,23 @@ class ColorByTime():
         
         return (packetColors, len(modifiedTimeIntervals)-1)
 
+class ColorByDefault():
+    '''
+    A default coloring method, set the same color for all indices.
+    '''
+    def __init__(self):
+        pass
+    
+    def color(self, packets):
+        '''
+        Get colors for respective packets, matching them by index.
+        Input: packets: Pandas.DataFrame or equivalent, with column of 'Time'.
+        Output: tuple (packetColors, amountOfColors), i.e. packetColors[5] matches packet at packets[5].
+        '''
+        packetColors = np.zeros(len(packets))
+
+        return (packetColors, 1)
+
 
 
 
